@@ -1,4 +1,8 @@
 import { walk } from '@std/fs'
+import { getFns } from './implementation.mjs'
+
+const { getOrInsert, getOrInsertComputed } = getFns([])
+const staging = [getOrInsertComputed.name]
 
 async function getCode(testPath: string) {
 	let code = ''
@@ -22,12 +26,12 @@ async function getCode(testPath: string) {
 	return code
 }
 
-for (const className of ['Map', 'WeakMap']) {
-	for (const fnName of ['getOrInsert', 'getOrInsertComputed']) {
-		Deno.test(`${className}.${fnName}`, async (t) => {
-			const path = fnName === 'getOrInsert'
-				? `./test262/test/built-ins/${className}/prototype/${fnName}`
-				: `./test262/test/staging/upsert/${className}/${fnName}`
+for (const Class of [Map, WeakMap]) {
+	for (const fn of [getOrInsert, getOrInsertComputed]) {
+		Deno.test(`${Class.name}.${fn.name}`, async (t) => {
+			const path = staging.includes(fn.name)
+				? `./test262/test/staging/upsert/${Class.name}/${fn.name}`
+				: `./test262/test/built-ins/${Class.name}/prototype/${fn.name}`
 
 			for await (const entry of walk(path)) {
 				if (entry.isFile) {
