@@ -1,32 +1,33 @@
 import { walk } from '@std/fs'
-import { getFns } from './implementation.mjs'
+import dedent_ from 'string-dedent'
+import { getMethods } from './implementation.mjs'
 
-const { getOrInsert, getOrInsertComputed } = getFns([])
-const staging = [getOrInsertComputed.name]
+const dedent = dedent_ as unknown as typeof dedent_.default
+
+const helpers: [fileName: string, idents: string[]][] = [
+	['assert.js', ['assert']],
+	['isConstructor.js', ['isConstructor']],
+	['sta.js', ['Test262Error']],
+	['propertyHelper.js', ['verifyProperty']],
+]
 
 async function getCode(testPath: string) {
-	let code = ''
-
-	for (
-		const [fileName, idents] of [
-			['assert.js', ['assert']],
-			['isConstructor.js', ['isConstructor']],
-			['sta.js', ['Test262Error']],
-			['propertyHelper.js', ['verifyProperty']],
-		] as const
-	) {
-		code += `${await Deno.readTextFile(`./test262/harness/${fileName}`)}\n${
-			idents.map((ident) => `globalThis.${ident} = ${ident}`).join('\n')
-		}\n`
+	return dedent`
+	${
+		(await Promise.all(helpers.map(async ([fileName, idents]) => [
+			await Deno.readTextFile(`./test262/harness/${fileName}`),
+			...idents.map((ident) => `globalThis.${ident} = ${ident}`),
+		]))).flat().join('\n')
 	}
-
-	code += `await import('./polyfill.mjs')\n`
-	code += `await import('./${testPath}')\n`
-
-	return code
+	await import('./polyfill.mjs')
+	await import('./${testPath}')
+	`
 }
 
 for (const Class of [Map, WeakMap]) {
+	const { getOrInsert, getOrInsertComputed } = getMethods([Class])
+	const staging = [getOrInsertComputed.name]
+
 	for (const fn of [getOrInsert, getOrInsertComputed]) {
 		Deno.test(`${Class.name}.${fn.name}`, async (t) => {
 			const path = staging.includes(fn.name)

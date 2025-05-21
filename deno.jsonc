@@ -1,7 +1,7 @@
 {
 	"lock": false,
 	"name": "@li/map-get-or-insert-polyfill",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"exports": {
 		".": "./ponyfill.mjs",
 		"./global": "./polyfill.mjs"
@@ -11,7 +11,8 @@
 	},
 	"imports": {
 		"@std/assert": "jsr:@std/assert@^1.0.2",
-		"@std/fs": "jsr:@std/fs@^1.0.1"
+		"@std/fs": "jsr:@std/fs@^1.0.1",
+		"string-dedent": "npm:string-dedent@^3.0.1"
 	},
 	"fmt": {
 		"semiColons": false,

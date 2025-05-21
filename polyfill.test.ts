@@ -25,11 +25,23 @@ Deno.test('Map.getOrInsert()', () => {
 	assertEquals(map.getOrInsert('b', 2), 2)
 })
 
-Deno.test('Map.getOrInsertComputed()', () => {
+Deno.test('Map.getOrInsertComputed()', async (t) => {
 	const map = new Map<string, number>()
 	map.set('a', 1)
 	assertEquals(map.getOrInsertComputed('a', () => 2), 1)
 	assertEquals(map.getOrInsertComputed('b', () => 2), 2)
+
+	await t.step('callback modifies map', () => {
+		const map = new Map<string, number>()
+		assertEquals(
+			map.getOrInsertComputed('a', () => {
+				map.set('a', 99)
+				return 1
+			}),
+			1,
+		)
+		assertEquals(map.get('a'), 1)
+	})
 })
 
 Deno.test('WeakMap.getOrInsert()', () => {
