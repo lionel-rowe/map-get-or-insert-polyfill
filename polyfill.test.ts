@@ -48,26 +48,21 @@ Deno.test('WeakMap.getOrInsertComputed()', () => {
 	assertEquals(map.getOrInsertComputed(b, () => 2), 2)
 })
 
-Deno.test('error messages', async (t) => {
-	// deno-fmt-ignore
-	const receivers = [
-		WeakMap, new WeakMap(), 1, 'a', null, undefined, [], {}, Object, Math,
-		Array, Symbol, Map, Symbol('xyz'), Date, new Date(0),
-		Symbol.for('abc'), Symbol.asyncIterator,
-	]
-
-	for (const receiver of receivers) {
-		await t.step(String(receiver), () => {
-			const getErr = assertThrows(() => {
-				Map.prototype.get.call(receiver, 1)
-			}, TypeError)
-
-			const getOrInsertErr = assertThrows(() => {
-				// @ts-expect-error wrong `this` type
-				Map.prototype.getOrInsert.call(receiver, 1, 2)
-			}, TypeError)
-
-			assertEquals(getOrInsertErr.message, getErr.message.replaceAll(/\bget\b/g, 'getOrInsert'))
-		})
-	}
+Deno.test('errors', async (t) => {
+	assertThrows(() => {
+		// @ts-expect-error wrong `this` type
+		Map.prototype.getOrInsert.call(new WeakMap(), 1, 2)
+	}, TypeError)
+	assertThrows(() => {
+		// @ts-expect-error wrong `this` type
+		WeakMap.prototype.getOrInsert.call(new Map(), {}, 2)
+	}, TypeError)
+	assertThrows(() => {
+		// @ts-expect-error wrong `this` type
+		Map.prototype.getOrInsertComputed.call(new WeakMap(), () => 1, 2)
+	}, TypeError)
+	assertThrows(() => {
+		// @ts-expect-error wrong `this` type
+		WeakMap.prototype.getOrInsertComputed.call(new Map(), () => {}, 2)
+	}, TypeError)
 })

@@ -23,27 +23,15 @@ export function getFns(allowedClasses) {
 	}
 }
 
-function assertInstanceType(instance, allowedClasses, methodName) {
+export function assertInstanceType(instance, allowedClasses, methodName) {
 	if (!allowedClasses.some((x) => instance instanceof x)) {
-		const [{ name }] = allowedClasses
-		throw new TypeError(`Method ${name}.prototype.${methodName} called on incompatible receiver ${toStr(instance)}`)
-	}
-}
-
-function toStr(obj) {
-	try {
-		if (typeof obj === 'object' && obj != null) {
-			const stringified = String(obj)
-			if (/^\[object \w+\]$/.test(stringified)) {
-				const protoCtorName = Object.getPrototypeOf(obj)?.constructor?.name
-				if (typeof protoCtorName === 'string') return `#<${protoCtorName}>`
-			}
-
-			return Object.prototype.toString.call(obj)
+		let err
+		try {
+			allowedClasses[0].prototype.get.call(instance)
+		} catch (e) {
+			err = e
 		}
 
-		return String(obj)
-	} catch {
-		return '[unknown]'
+		throw err instanceof TypeError ? new TypeError(err.message.replace('get', methodName)) : new TypeError()
 	}
 }
