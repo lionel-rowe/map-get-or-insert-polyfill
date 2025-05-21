@@ -48,7 +48,7 @@ Deno.test('WeakMap.getOrInsertComputed()', () => {
 	assertEquals(map.getOrInsertComputed(b, () => 2), 2)
 })
 
-Deno.test('errors', async (t) => {
+Deno.test('errors', () => {
 	assertThrows(() => {
 		// @ts-expect-error wrong `this` type
 		Map.prototype.getOrInsert.call(new WeakMap(), 1, 2)
