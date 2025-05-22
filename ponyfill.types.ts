@@ -3,6 +3,16 @@
  *
  * A ponyfill for the upcoming `getOrInsert` and `getOrInsertComputed` methods of `Map` and `WeakMap`
  * ([proposal](https://github.com/tc39/proposal-upsert/) currently at Stage 2.7).
+ *
+ * @example
+ * ```ts
+ * import { mapGetOrInsert, mapGetOrInsertComputed } from '@li/map-get-or-insert-polyfill'
+ *
+ * const map = new Map<string, number>()
+ * map.set('a', 1)
+ * assertEquals(mapGetOrInsert(map, 'a', 2), 1)
+ * assertEquals(mapGetOrInsertComputed(map, 'b', () => 2), 2)
+ * ```
  */
 
 /**

@@ -16,6 +16,7 @@
  * ```
  */
 
+/** Extension methods for Map */
 export interface MapGetOrInsertMethods<K, V> {
 	/**
 	 * Get a value from a Map, or insert a default value if it doesn't exist.
@@ -58,6 +59,7 @@ export interface MapGetOrInsertMethods<K, V> {
 	) => V
 }
 
+/** Extension methods for WeakMap */
 export interface WeakMapGetOrInsertMethods<K extends WeakKey, V> {
 	/**
 	 * Get a value from a WeakMap, or insert a default value if it doesn't exist.
