@@ -1,8 +1,5 @@
 import { walk } from '@std/fs'
-import dedent_ from 'string-dedent'
 import { getMethods } from './implementation.mjs'
-
-const dedent = dedent_ as unknown as typeof dedent_.default
 
 const helpers: [fileName: string, idents: string[]][] = [
 	['assert.js', ['assert']],
@@ -11,18 +8,17 @@ const helpers: [fileName: string, idents: string[]][] = [
 	['propertyHelper.js', ['verifyProperty']],
 ]
 
-async function getCode(testPath: string) {
-	return dedent`
-	${
-		(await Promise.all(helpers.map(async ([fileName, idents]) => [
-			await Deno.readTextFile(`./test262/harness/${fileName}`),
-			...idents.map((ident) => `globalThis.${ident} = ${ident}`),
-		]))).flat().join('\n')
-	}
-	await import('./polyfill.mjs')
-	await import('./${testPath}')
-	`
-}
+const prelude = (await Promise.all(helpers.map(async ([fileName, idents]) => [
+	await Deno.readTextFile(`./test262/harness/${fileName}`),
+	...idents.map((ident) => `globalThis.${ident} = ${ident}`),
+]))).flat().join('\n')
+
+const getCode = (testPath: string) =>
+	[
+		`${prelude}`,
+		`await import('./polyfill.mjs')`,
+		`await import('./${testPath}')`,
+	].join('\n')
 
 for (const Class of [Map, WeakMap]) {
 	const { getOrInsert, getOrInsertComputed } = getMethods([Class])
@@ -38,7 +34,7 @@ for (const Class of [Map, WeakMap]) {
 				if (entry.isFile) {
 					await t.step(entry.name, async () => {
 						const result = await new Deno.Command(Deno.execPath(), {
-							args: ['eval', await getCode(entry.path)],
+							args: ['eval', getCode(entry.path)],
 							cwd: Deno.cwd(),
 							stderr: 'piped',
 						}).spawn().output()

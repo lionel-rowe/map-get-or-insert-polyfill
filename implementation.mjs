@@ -1,3 +1,6 @@
+const GET_OR_INSERT = 'getOrInsert'
+const GET_OR_INSERT_COMPUTED = 'getOrInsertComputed'
+
 const { getOrInsert, getOrInsertComputed } = getMethods([Map, WeakMap])
 
 export function mapGetOrInsert(self, key, defaultValue) {
@@ -8,16 +11,16 @@ export function mapGetOrInsertComputed(self, key, callback) {
 	return getOrInsertComputed.call(self, key, callback)
 }
 
-export function getMethods(allowedClasses) {
+export function getMethods(allowedReceivers) {
 	return {
-		getOrInsert(key, defaultValue) {
-			assertInstanceType(this, allowedClasses, 'getOrInsert')
+		[GET_OR_INSERT](key, defaultValue) {
+			assertInstanceType(this, allowedReceivers, GET_OR_INSERT)
 			if (this.has(key)) return this.get(key)
 			this.set(key, defaultValue)
 			return defaultValue
 		},
-		getOrInsertComputed(key, callback) {
-			assertInstanceType(this, allowedClasses, 'getOrInsertComputed')
+		[GET_OR_INSERT_COMPUTED](key, callback) {
+			assertInstanceType(this, allowedReceivers, GET_OR_INSERT_COMPUTED)
 			if (this.has(key)) return this.get(key)
 			const defaultValue = callback(key)
 			this.set(key, defaultValue)
@@ -26,9 +29,9 @@ export function getMethods(allowedClasses) {
 	}
 }
 
-export function assertInstanceType(instance, allowedClasses, methodName) {
-	if (!allowedClasses.some((x) => instance instanceof x)) {
-		const [Class] = allowedClasses
+export function assertInstanceType(instance, allowedReceivers, methodName) {
+	if (!allowedReceivers.some((x) => instance instanceof x)) {
+		const [Class] = allowedReceivers
 		const dummyMethodName = 'get'
 		let err
 		try {

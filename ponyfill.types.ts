@@ -21,12 +21,8 @@
  * assertEquals(mapGetOrInsert(map, 'b', 2), 2)
  * ```
  */
-
-export declare function mapGetOrInsert<K, V>(
-	self: Map<K, V> | (K extends WeakKey ? WeakMap<K, V> : never),
-	key: K,
-	defaultValue: V,
-): V
+export declare function mapGetOrInsert<K, V>(self: Map<K, V>, key: K, defaultValue: V): V
+export declare function mapGetOrInsert<K extends WeakKey, V>(self: WeakMap<K, V>, key: K, defaultValue: V): V
 
 /**
  * Get a value from a Map or WeakMap, or insert a default computed value if it doesn't exist.
@@ -44,8 +40,9 @@ export declare function mapGetOrInsert<K, V>(
  * assertEquals(mapGetOrInsertComputed(map, 'b', () => 2), 2)
  * ```
  */
-export declare function mapGetOrInsertComputed<K, V>(
-	self: Map<K, V> | (K extends WeakKey ? WeakMap<K, V> : never),
+export declare function mapGetOrInsertComputed<K, V>(self: Map<K, V>, key: K, callback: (key: K) => V): V
+export declare function mapGetOrInsertComputed<K extends WeakKey, V>(
+	self: WeakMap<K, V>,
 	key: K,
 	callback: (key: K) => V,
 ): V
